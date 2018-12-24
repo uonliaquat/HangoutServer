@@ -15,7 +15,7 @@ using namespace std;
 
 int main() {
 
-	static const char SERVER_IP[] = "10.211.55.3";
+	static const char SERVER_IP[] = "10.211.55.3";//"10.211.55.3";
 	static const int SERVER_PORT = 54000;
 	static const int SERVER_PING_PORT = 64000;
 	SOCKET listening_socket, ping_listening_socket, client_socket;
