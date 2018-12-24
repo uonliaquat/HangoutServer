@@ -2,7 +2,7 @@
 #include "MessageQueue.h"
 
 
-void MessageQueue::Add_Message(string sender_name, string sender_username, string sender_pic_url,  string receiver_username, string message, string status, string event_date, string event_time)
+void MessageQueue::Add_Message(string sender_name, string sender_username, string sender_pic_url,  string receiver_username, string message, string status, string event_date, string event_time, string place, string latlng, string event_id)
 {
 	Message *newMessage = new Message;
 	newMessage->sender = sender_name;
@@ -13,6 +13,9 @@ void MessageQueue::Add_Message(string sender_name, string sender_username, strin
 	newMessage->sender_picture_url = sender_pic_url;
 	newMessage->date = event_date;
 	newMessage->time = event_time;
+	newMessage->place = place;
+	newMessage->latlng = latlng;
+	newMessage->event_id = event_id;
 
 	Message * temp = root;
 	if (temp == nullptr) {
@@ -36,12 +39,17 @@ string MessageQueue::Get_Message(string username) {
 		}
 		i = 1;
 		if (temp->receiver == username) {
-			string msg = temp->sender + "///" + temp->sender_username + "///" + temp->sender_picture_url + "///" + temp->status + "///" + temp->message + "///" + temp->date + "///" + temp->time;
-			Message * temp2 = temp;
-			temp1->next = temp2->next;
-			delete temp2;
+			string msg = temp->sender + "///" + temp->sender_username + "///" + temp->sender_picture_url + "///" + temp->status + "///" + temp->message + "///" + temp->date + "///" + temp->time + "///" + temp->place + "///" + temp->latlng + "///" + temp->event_id;
+			if (root = temp) {
+				delete temp;
+				root  = nullptr;
+			}
+			else {
+				temp1->next = temp->next;
+				delete temp;
+			}
+			
 			return msg;
-
 		}
 		temp = temp->next;
 	}

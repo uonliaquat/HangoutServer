@@ -25,9 +25,6 @@ int main() {
 	FileHandling fileHandling;
 
 
-	//Establish MySQL Conenction
-	MySQLConnection mysql_connection;
-
 	//WinSock Startup
 	WSAData wsaData;
 	WORD Dllversion = MAKEWORD(2, 1);
@@ -89,7 +86,6 @@ int main() {
 	cout << "Server Started!" << endl;
 	char rec_buf[4096];
 	char send_buf[4096];
-	string msg;
 	while (true)
 	{
 		//Wait for connection
@@ -99,12 +95,17 @@ int main() {
 		memset(rec_buf, 4096, 0);
 		memset(send_buf, 4096, 0);
 		int bytesReceived = recv(client_socket, rec_buf, 4096, 0);
+
+
+
+
 		if (bytesReceived > 0) {
+
 			//Check Client Request Method
 			if (json_parser.getMethod(rec_buf) == constants.PING) {
 				string username = json_parser.getUsername(rec_buf);
 				string result = mySQLMethods.messageQueue.Get_Message(username);
-				msg = constants.PING + " " + result;
+				string msg = constants.PING + " " + result;
 				if (result != "") {
 					strcpy_s(send_buf, msg.c_str());
 					if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
@@ -116,11 +117,12 @@ int main() {
 				string name = json_parser.getName(rec_buf);
 				string username = json_parser.getUsername(rec_buf);
 				string password = json_parser.getPassword(rec_buf);
+				string msg;
 				int status = mySQLMethods.RegisterUser(name, username, password);
 				if (status == 0) {
 					msg = constants.REGISTER_USER + " Registered successfully!";
 				}
-				else if(status == -2){
+				else if (status == -2) {
 					msg = constants.REGISTER_USER + " Username already exists!";
 				}
 				else {
@@ -134,6 +136,7 @@ int main() {
 			else if (json_parser.getMethod(rec_buf) == constants.LOGIN_USER) {
 				string username = json_parser.getUsername(rec_buf);
 				string password = json_parser.getPassword(rec_buf);
+				string msg;
 				int status = mySQLMethods.LoginUser(username, password);
 				if (status == 0) {
 					msg = constants.LOGIN_USER + " Logged In successfully!";
@@ -141,7 +144,7 @@ int main() {
 				else if (status == -2) {
 					msg = constants.LOGIN_USER + " Username doesn't exist!";
 				}
-				else{
+				else {
 					msg = constants.LOGIN_USER + " Couldn't Login!";
 				}
 				strcpy_s(send_buf, msg.c_str());
@@ -152,6 +155,7 @@ int main() {
 			else if (json_parser.getMethod(rec_buf) == constants.GET_ALL_USERS) {
 				string username = json_parser.getUsername(rec_buf);
 				string result = mySQLMethods.GetAllUsers(username);
+				string msg;
 				if (result != " ") {
 					msg = constants.GET_ALL_USERS + " " + result;
 				}
@@ -163,10 +167,25 @@ int main() {
 					//cout << send_buf << endl;
 				}
 			}
+			else if (json_parser.getMethod(rec_buf) == constants.GET_FRIENDS) {
+				string username = json_parser.getUsername(rec_buf);
+				string result = mySQLMethods.GetFriends(username);
+				string msg;
+				if (result != " ") {
+					msg = constants.GET_FRIENDS + " " + result;
+				}
+				else {
+					msg = constants.GET_FRIENDS + " Couldn't fetch your friends!";
+				}
+				strcpy_s(send_buf, msg.c_str());
+				if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+					//cout << send_buf << endl;
+				}
+			}
 			else if (json_parser.getMethod(rec_buf) == constants.SEND_FRIEND_REQUEST) {
 				string sender_username = json_parser.getUsername(rec_buf);
 				string receiver_username = json_parser.getReceiverUsername(rec_buf);
-
+				string msg;
 				int status = mySQLMethods.Message(sender_username, receiver_username, "", constants.FRIEND_REQUEST);
 				if (status == 0) {
 					msg = constants.SEND_FRIEND_REQUEST + " Friend Request Sent!";
@@ -184,6 +203,7 @@ int main() {
 				string name = json_parser.getName(rec_buf);
 				string image_url = json_parser.getProfilePictureUrl(rec_buf);
 				int status = mySQLMethods.SavePictureUrl(username, image_url, name);
+				string msg;
 				if (status == 0) {
 					msg = constants.SAVE_PROFILE_PIC + " Picture Uplaoded Successfuly!";
 				}
@@ -201,10 +221,23 @@ int main() {
 					cout << send_buf << endl;
 				}
 			}
+
+			else if (json_parser.getMethod(rec_buf) == constants.GET_PROFILE_PIC) {
+				string username = json_parser.getUsername(rec_buf);
+				string result = mySQLMethods.GetPictureUrl(username);
+				result = constants.GET_PROFILE_PIC + " " + result;
+				if (result != "" && result != "null") {
+					strcpy_s(send_buf, result.c_str());
+					if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+						//cout << send_buf << endl;
+					}
+				}
+			}
 			else if (json_parser.getMethod(rec_buf) == constants.FRIEND_REQUEST_ACCEPTED) {
 				string sender_username = json_parser.getUsername(rec_buf);
 				string receiver_username = json_parser.getReceiverUsername(rec_buf);
-				int status = mySQLMethods.Message(sender_username, receiver_username, "", constants.FRIEND_REQUEST_ACCEPTED);
+				string msg;
+				int status = mySQLMethods.Message(sender_username, receiver_username, "", constants.FRIEND_REQUEST_ACCEPTED);		
 				if (status == 0) {
 					msg = constants.SEND_FRIEND_REQUEST + " Friend Request Accepted!";
 				}
@@ -220,6 +253,7 @@ int main() {
 				string sender_username = json_parser.getUsername(rec_buf);
 				string receiver_username = json_parser.getReceiverUsername(rec_buf);
 				string message = json_parser.getMessage(rec_buf);
+				string msg;
 				int status = mySQLMethods.Message(sender_username, receiver_username, message, constants.MESSAGE);
 				if (status == 0) {
 					msg = constants.MESSAGE + " Message Received!";
@@ -229,12 +263,24 @@ int main() {
 					msg = constants.MESSAGE + " Couldn't receive message!";
 					cout << msg << endl;
 				}
-//				strcpy_s(send_buf, msg.c_str());
-//				if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
-//					cout << send_buf << endl;
-//				}
+				//				strcpy_s(send_buf, msg.c_str());
+				//				if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+				//					cout << send_buf << endl;
+				//				}
 			}
-			else if (json_parser.getMethod(rec_buf) == constants.EVENT_REQUEST) {
+			else if (json_parser.getMethod(rec_buf) == constants.GET_EVENT_REQUESTS) {
+				string username = json_parser.getUsername(rec_buf);
+				string result = mySQLMethods.GetEventRequests(username);
+				string msg;
+				if (result != " " && result != "******") {
+					msg = constants.GET_EVENT_REQUESTS + +" " + result;
+					strcpy_s(send_buf, msg.c_str());
+					if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+						//cout << send_buf << endl;
+					}
+				}
+			}
+			else if (json_parser.getMethod(rec_buf) == constants.SEND_EVENT_REQUEST) {
 				struct Node_event {
 					Node_event * next = nullptr;
 					string username = "";
@@ -244,10 +290,12 @@ int main() {
 				string event_name = json_parser.getMessage(rec_buf);
 				string event_date = json_parser.getDate(rec_buf);
 				string event_time = json_parser.getTime(rec_buf);
-				
+				string event_place = json_parser.getPlace(rec_buf);
+				string latlng = json_parser.getLatlng(rec_buf);
+
 				Node_event * root = nullptr;
 
-			
+
 				string _username_receiver = "";
 				for (int i = 0; i < username_receiver.length(); i++) {
 					if (username_receiver[i] == '.' && username_receiver[i + 1] == '.' && username_receiver[i + 2] == '.') {
@@ -274,32 +322,86 @@ int main() {
 
 				Node_event * temp = root;
 				int status;
+				int count = 0;
+				string msg;
 				while (temp != nullptr) {
-					status = mySQLMethods.Event(event_name, username, temp->username, constants.EVENT_REQUEST, event_date, event_time);
+					status = mySQLMethods.Event(event_name, username, temp->username, constants.SEND_EVENT_REQUEST, event_date, event_time, event_place, latlng, count);
 					temp = temp->next;
+					count++;
 				}
 				if (status == 0) {
-					msg = constants.EVENT_REQUEST + " Event Request Sent!";
-			
+					msg = constants.SEND_EVENT_REQUEST + " Event Request Sent!";
+
 				}
-				else if(status == -1){
-					msg = constants.EVENT_REQUEST + " Couldn't send Event Request!";
+				else if (status == -1) {
+					msg = constants.SEND_EVENT_REQUEST + " Couldn't send Event Request!";
 				}
 				strcpy_s(send_buf, msg.c_str());
 				if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
 					cout << send_buf << endl;
 				}
-				
+
 			}
+			else if (json_parser.getMethod(rec_buf) == constants.EVENT_REQUEST_ACCEPTED) {
+				string username = json_parser.getUsername(rec_buf);
+				string event_id = json_parser.getEventId(rec_buf);
+				string msg;
+				int status = mySQLMethods.Message(username, "", event_id, constants.EVENT_REQUEST_ACCEPTED);
+				if (status == 0) {
+					msg = constants.EVENT_REQUEST_ACCEPTED + +" Event Request Accepted!";
+				}
+				else {
+					msg = constants.EVENT_REQUEST_ACCEPTED + +" Couldn't Accept Event Request!";
+				}
+				strcpy_s(send_buf, msg.c_str());
+				if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+					//cout << send_buf << endl;
+				}
 
+			}
+			else if (json_parser.getMethod(rec_buf) == constants.GET_PENDING_EVENTS) {
+				string username = json_parser.getUsername(rec_buf);
+				string result = mySQLMethods.GetPendingEvents(username);
+				if (result != " " && result != "******") {
+					result = constants.GET_PENDING_EVENTS + " " + result;
+					strcpy_s(send_buf, result.c_str());
+					if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+						//cout << send_buf << endl;
+					}
+				}
+			}
+			else if (json_parser.getMethod(rec_buf) == constants.SAVE_MEMORY) {
+				string username = json_parser.getUsername(rec_buf);
+				string pic_url = json_parser.getProfilePictureUrl(rec_buf);
+				int status = mySQLMethods.SaveMemory(username, pic_url);
+				string msg;
+				if (status == 0) {
+					msg = constants.SAVE_MEMORY + " Memory Posted Successfully!";
+				}
+				else {
+					msg = constants.SAVE_MEMORY + " Couldn't post your memory!";
+				}
+				strcpy_s(send_buf, msg.c_str());
+				if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+					//cout << send_buf << endl;
+				}
+			}
+			else if (json_parser.getMethod(rec_buf) == constants.GET_MEMORY) {
+				string username = json_parser.getUsername(rec_buf);
+				string result = mySQLMethods.GetMemory(username);
+				if (result != " ") {
+					result = constants.GET_MEMORY + " " + result;
+					strcpy_s(send_buf, result.c_str());
+					if ((send(client_socket, send_buf, strlen(send_buf), 0)) != -1) {
+						//cout << send_buf << endl;
+					}
+				}
+
+			}
+			closesocket(client_socket);
 		}
-		closesocket(client_socket);
+
 	}
-
-
-
-
-
 
 	closesocket(listening_socket);
 	WSACleanup();

@@ -6,7 +6,7 @@ MySQLConnection::MySQLConnection() {
 	conn = mysql_init(0);
 	conn = mysql_real_connect(conn, HOST, USERNAME, PASSWORD, DATABASE, PORT, NULL, 0);
 	if (conn) {
-		cout << "Succelfully Connected to Database!" << endl;
+		cout << "Successfully Connected to Database!" << endl;
 	}
 	else {
 		cout << "Couldn't connect to database" << endl;

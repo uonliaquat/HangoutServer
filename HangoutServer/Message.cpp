@@ -3,12 +3,15 @@
 
 Message::Message() {
 	next = nullptr;
-	message = "";
-	sender = "";
-	receiver = "";
-	status = "";
-	sender_picture_url = "";
-	sender_username = "";
-	date = "";
-	time = "";
+	message = " ";
+	sender = " ";
+	receiver = " ";
+	status = " ";
+	sender_picture_url = " ";
+	sender_username = " ";
+	date = " ";
+	time = " ";
+	place = " ";
+	latlng = " ";
+	event_id = " ";
 }

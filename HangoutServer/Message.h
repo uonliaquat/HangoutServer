@@ -19,7 +19,10 @@ public:
 	string sender_picture_url;
 	string date;
 	string time;
+	string place;
+	string latlng;
 	Message * next;
+	string event_id;
 
 
 };

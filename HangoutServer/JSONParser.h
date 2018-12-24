@@ -21,6 +21,9 @@ public:
 	string getMessage(string str);
 	string getDate(string str);
 	string getTime(string str);
+	string getPlace(string str);
+	string getLatlng(string str);
+	string getEventId(string str);
 
 private:
 	Constants constants;

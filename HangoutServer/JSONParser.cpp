@@ -32,9 +32,31 @@ string JSONParser::getMethod(string str) {
 	else if (strstr(str.c_str(), constants.MESSAGE.c_str())) {
 		return constants.MESSAGE;
 	}
-	else if (strstr(str.c_str(), constants.EVENT_REQUEST.c_str())) {
-		return constants.EVENT_REQUEST;
+	else if (strstr(str.c_str(), constants.SEND_EVENT_REQUEST.c_str())) {
+		return constants.SEND_EVENT_REQUEST;
 	}
+	else if (strstr(str.c_str(), constants.GET_FRIENDS.c_str())) {
+		return constants.GET_FRIENDS;
+	}
+	else if (strstr(str.c_str(), constants.GET_EVENT_REQUESTS.c_str())) {
+		return constants.GET_EVENT_REQUESTS;
+	}
+	else if (strstr(str.c_str(), constants.EVENT_REQUEST_ACCEPTED.c_str())) {
+		return constants.EVENT_REQUEST_ACCEPTED;
+	}
+	else if (strstr(str.c_str(), constants.GET_PENDING_EVENTS.c_str())) {
+		return constants.GET_PENDING_EVENTS;
+	}
+	else if (strstr(str.c_str(), constants.GET_PROFILE_PIC.c_str())) {
+		return constants.GET_PROFILE_PIC;
+	}
+	else if (strstr(str.c_str(), constants.SAVE_MEMORY.c_str())) {
+		return constants.SAVE_MEMORY;
+	}
+	else if (strstr(str.c_str(), constants.GET_MEMORY.c_str())) {
+		return constants.GET_MEMORY;
+	}
+
 }
 
 string JSONParser::getName(string str) {
@@ -158,5 +180,52 @@ string JSONParser::getTime(string str) {
 		}
 	}
 	return time;
+
+}
+
+string JSONParser::getPlace(string str) {
+	string place = "";
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == 'p' && str[i + 1] == 'l' && str[i + 2] == 'a' && str[i + 3] == 'c' && str[i + 4] == 'e') {
+			i = i + 8;
+			while (str[i] != '"') {
+				place = place + str[i];
+				i++;
+			}
+			break;
+		}
+	}
+	return place;
+}
+
+string JSONParser::getLatlng(string str) {
+	string latlng = "";
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == 'l' && str[i + 1] == 'a' && str[i + 2] == 't' && str[i + 3] == 'l' && str[i + 4] == 'n' && str[i + 5] == 'g') {
+			i = i + 9;
+			while (str[i] != '"') {
+				latlng = latlng + str[i];
+				i++;
+			}
+			break;
+		}
+	}
+	return latlng;
+
+}
+
+string JSONParser::getEventId(string str) {
+	string event_id = "";
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == 'e' && str[i + 1] == 'v' && str[i + 2] == 'e' && str[i + 3] == 'n' && str[i + 4] == 't' && str[i + 5] == '_' && str[i + 6] == 'i' && str[i + 7] == 'd') {
+			i = i + 11;
+			while (str[i] != '"') {
+				event_id = event_id + str[i];
+				i++;
+			}
+			break;
+		}
+	}
+	return event_id;
 
 }
