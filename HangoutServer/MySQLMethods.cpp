@@ -73,7 +73,7 @@ string MySQLMethods::GetAllUsers(string username) {
 string MySQLMethods::GetFriends(string username) {
 
 	string result;
-	query = "SELECT Users.name, Users.username, Users.image_url FROM Users INNER JOIN Friends ON Friends.sender = Users.username WHERE Friends.status = 'Friends' AND Friends.receiver = '"+ username +"'" ;
+	query = "SELECT Users.name, Users.username, Users.image_url FROM Users INNER JOIN Friends ON Friends.sender = Users.username  OR Friends.receiver = Users.username";
 	q = query.c_str();
 	qstate = mysql_query(mySQLConnection.getConnection(), q);
 	if (!qstate) {
@@ -122,8 +122,21 @@ string MySQLMethods::GetPendingEvents(string username) {
 			result = result + +"///";
 			result = result + row[0] + "::" + row[1] + "::" + row[2] + "::" + row[3] + "::" + row[4] + "::" + row[5] + "::" + row[6] + "::" + row[7];
 		}
-		result = result + "******";
-		return result;
+		query = "SELECT Events_Detail.event_creator, Events_Detail.event_name, Events_Detail.date, Events_Detail.time, Events_Detail.location, Events_Detail.latLng, Events_Detail.event_id FROM Events INNER JOIN Events_Detail ON Events_Detail.event_id = Events.event_id WHERE Events_Detail.event_creator = '" + username + "' AND Events.status = '" + constants.ACCEPTED + "' AND Events.event_id = Events_Detail.event_id";
+		q = query.c_str();
+		qstate = mysql_query(mySQLConnection.getConnection(), q);
+		if (!qstate) {
+			res = mysql_store_result(mySQLConnection.getConnection());
+			while (row = mysql_fetch_row(res)) {
+				result = result + +"///";
+				result = result + row[0] + "::" + row[1] + "::" + row[2] + "::" + row[3] + "::" + row[4] + "::" + row[5] + "::" + row[6] + "::" + row[7];
+			}
+			result = result + "******";
+			return result;
+		}
+		else {
+			return " ";
+		}
 	}
 	else {
 		return " ";
@@ -148,6 +161,10 @@ int MySQLMethods::Message(string sender_username, string receiver_username, stri
 	}
 	else if (status == constants.EVENT_REQUEST_ACCEPTED) {
 		query = "Update Events SET status = '" + constants.ACCEPTED + "' WHERE event_id = " + message + " AND receiver = '" + sender_username + "'";
+	}
+	else {
+		messageQueue.Add_Message(sender_name, sender_username, "", event_creator, event_name, status, date, time, location, latlng, message);
+		return 0;
 	}
 	q = query.c_str();
 	qstate = mysql_query(mySQLConnection.getConnection(), q);
