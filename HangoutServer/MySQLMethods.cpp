@@ -79,8 +79,10 @@ string MySQLMethods::GetFriends(string username) {
 	if (!qstate) {
 		res = mysql_store_result(mySQLConnection.getConnection());
 		while (row = mysql_fetch_row(res)) {
-			result = result + +"///";
-			result = result + row[0] + "::" + row[1] + "::" + row[2];
+			if (row[1] != username) {
+				result = result + +"///";
+				result = result + row[0] + "::" + row[1] + "::" + row[2];
+			}
 		}
 		result = result + "******";
 		return result;
