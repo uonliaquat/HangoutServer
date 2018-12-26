@@ -15,5 +15,9 @@ MySQLConnection::MySQLConnection() {
 }
 
 MYSQL* MySQLConnection::getConnection() {
+	if (!conn) {
+		conn = mysql_init(0);
+		conn = mysql_real_connect(conn, HOST, USERNAME, PASSWORD, DATABASE, PORT, NULL, 0);
+	}
 	return conn;
 }
